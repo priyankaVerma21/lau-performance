@@ -1,0 +1,92 @@
+plugins {
+    id 'uk.gov.hmcts.java' version '0.12.0'
+    id 'scala'
+    id 'com.github.lkishalmi.gatling' version '3.0.2'
+//    id 'java-gradle-plugin'
+    id 'groovy'
+    id 'com.gradle.plugin-publish' version '0.12.0'
+    id 'maven-publish'
+}
+
+//apply plugin: 'java'
+apply plugin: 'scala'
+group 'uk.gov.hmcts.reform'
+version = '1.0'
+
+tasks.withType(JavaExec) {
+    jvmArgs = ['-Xms512m', '-Xmx1024m', '-XX:+UseConcMarkSweepGC']
+}
+
+//sourceCompatibility = "11"
+//targetCompatibility = "11"
+
+/*dependencyCheck {	
+    suppressionFile = 'config/owasp/suppressions.xml'
+}*/
+
+repositories {
+    jcenter()
+}
+
+//jar {
+//    manifest {
+//        attributes 'Implementation-Title': 'EXUI Performance Tests',
+//                'Implementation-Version': version
+//    }
+//}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'io.gatling.app.Gatling'
+    }
+    from {
+        configurations.testCompile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    from sourceSets.test.output
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+}
+
+/*dependencyCheck {
+    // Specifies if the build should be failed if a CVSS score above a specified level is identified.
+    // range of 0-10 fails the build, anything greater and it doesn't fail the build
+    failBuildOnCVSS = System.getProperty('dependencyCheck.failBuild') == 'true' ? 0 : 11
+    suppressionFile = 'dependency-check-suppressions.xml'
+}*/
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    //compile 'org.scala-lang:scala-library:2.12.8'
+    gatlingCompile 'com.warrenstrange:googleauth:1.1.5'
+    //compile group: 'io.gatling', name: 'gatling-app', version: '3.1.1'
+    //compile group: 'io.gatling', name: 'gatling-recorder', version: '3.1.1'
+    //compile group: 'io.gatling.highcharts', name: 'gatling-charts-highcharts', version: '3.1.1'
+    //gatlingCompile group: 'uk.gov.service.notify', name: 'notifications-java-client', version: '3.14.1-RELEASE'
+}
+
+gatling {
+    toolVersion '3.1.1'
+    scalaVersion '2.12.8'
+    simulations = [ 'uk.gov.hmcts.reform.LandA.performance.simulations.mainSimulation'
+    ]
+}
+
+
+test {
+    testLogging {
+        showStandardStreams = true
+    }
+    dependsOn("publishToMavenLocal")
+    systemProperty "com.github.lkishalmi.gatling.version", project.version
+}
+
+pluginBundle {
+    website = 'https://github.com/lkishalmi/gradle-gatling-plugin'
+    vcsUrl = 'https://github.com/lkishalmi/gradle-gatling-plugin'
+    description = 'Gatling Simulation Execution'
+    tags = ['gatling', 'load test', 'stress test', 'performance test', 'scala']
+}
+
+ext ['netty.version'] = '4.0.51.Final'
