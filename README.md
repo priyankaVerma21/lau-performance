@@ -1,4 +1,3 @@
-Gatling nightly performance tests for Location Reference Data (LRD).
+Log and Audit Performance
 
-                
-# Log-Audit-Perftest
+Gatling performance tests for Log and Audit
