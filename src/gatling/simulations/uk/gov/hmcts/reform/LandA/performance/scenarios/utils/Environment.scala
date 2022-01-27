@@ -1,27 +1,20 @@
 package uk.gov.hmcts.reform.LandA.performance.scenarios.utils
 
 import com.typesafe.config.ConfigFactory
+import io.gatling.core.Predef._
+import io.gatling.http.Predef._
 
 object Environment {
 
-  val env = "aat"
-  val baseURL = "http://rd-location-ref-api-" + env + ".service.core-compute-" + env + ".internal"
-  val idamURL = "https://idam-api." + env + ".platform.hmcts.net"
-  val idamRedirectURL = "https://rd-location-ref-api-" + env + ".service.core-compute-" + env + ".internal/oauth2redirect"
-  val idamClient = "rd-location-ref-api"
-  val idamSecret = ConfigFactory.load.getString("auth.clientSecret")
-  val idamScope = "openid profile roles search-user"
-  val idamUsername = "kotlaprashanthlrd@mailinator.com"
-  val idamPassword = "Testcts1"
-  val s2sURL = "http://rpe-service-auth-provider-" + env + ".service.core-compute-" + env + ".internal/testing-support"
-  val s2sService = "rd_location_ref_api"
-  val s2sSecret = ConfigFactory.load.getString("aat_service.pass")
+  val baseUrl = "https://lau.perftest.platform.hmcts.net"
+  val S2S_BASE_URI = "http://rpe-service-auth-provider-perftest.service.core-compute-perftest.internal/testing-support"
+  val idamUrl = "https://idam-web-public.perftest.platform.hmcts.net/login"
+  val caseUsers = csv("CaseUsers.csv").circular
+  val caseSearches = csv("CaseSearchInfo.csv").circular
+  val logonUsers = csv ("LogonUsers.csv").circular
+  val logonSearches = csv("LogonSearchInfo.csv").circular
 
-  val headers_1 = Map(
-   "Authorization" -> "Bearer ${accessToken}",
-   "serviceAuthorization" -> "${s2sToken}"
-  )
 
-  val thinkTime = 10
+  val thinkTime = 2
 
 }

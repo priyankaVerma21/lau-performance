@@ -1,62 +1,53 @@
 package uk.gov.hmcts.reform.LandA.performance.scenarios
 
-import io.gatling.core.Predef.{feed, _}
+import io.gatling.core.Predef._
 import io.gatling.http.Predef._
-import uk.gov.hmcts.reform.LandA.performance.scenarios.utils.CommonHeader
+import utils.{Environment, CommonHeader}
 
 
 object LAUCaseScenario {
 
 
-  val httpProtocol = http
-    .baseUrl("https://lau.perftest.platform.hmcts.net")
-    .doNotTrackHeader("1")
-    .inferHtmlResources()
-    .silentResources
-
-  val uri3 = "https://idam-web-public.perftest.platform.hmcts.net/login"
+  val BaseURL = Environment.baseUrl
+  val IdamURL = Environment.idamUrl
+  val CaseUsers = Environment.caseUsers
+  val CaseSearches = Environment.caseSearches
 
 
-  val CaseUsers = csv("CaseUsers.csv").circular
-  val CaseSearches = csv("CaseSearchInfo.csv").circular
-  val S2S_BASE_URI = "http://rpe-service-auth-provider-perftest.service.core-compute-perftest.internal/testing-support"
-  val baseurl = "https://lau.perftest.platform.hmcts.net"
 
   val S2SAuthToken =
 
-  group("S2S Authorisation") {
+  group("LAU_010_Case_S2S") {
     exec(http("PaymentAPIToken_020_GetServiceToken")
-      .post(S2S_BASE_URI + "/lease")
+      .post(Environment.S2S_BASE_URI + "/lease")
       .header("Content-Type", "application/json")
       .body(StringBody(
         """{
        "microservice": "lau_frontend"
         }"""
       )).asJson
-      .check(bodyString.saveAs("s2sToken"))
-      .check(bodyString.saveAs("responseBody")))
-
+      .check(bodyString.saveAs("s2sToken")))
 
   }
     .exitHereIfFailed
-    .pause(10)
+    .pause(Environment.thinkTime)
 
 
 
   val LAUcsrfCheck =
-  group("LAU csrf Check") {
+  group("LAU_020_Case_CSRF") {
     exec(http("CSRF check")
-      .get(uri3 + "?client_id=lau&response_type=code&redirect_uri=https://lau.perftest.platform.hmcts.net/oauth2/callback")
+      .get(IdamURL + "?client_id=lau&response_type=code&redirect_uri=" + BaseURL + "/oauth2/callback")
       .headers(CommonHeader.case_headers_login)
       .check(css("input[name='_csrf']", "value").saveAs("csrfToken"))
     )
   }
 
-  val LAUCaselogin =
+  val LAUCaselogin = {
     feed(CaseUsers)
-    .group("LAU Case Login") {
+    .group("LAU_030_Case_Login") {
      exec(http("LAU Case login")
-        .post(uri3 + "?client_id=lau&response_type=code&redirect_uri=https://lau.perftest.platform.hmcts.net/oauth2/callback")
+        .post(IdamURL + "?client_id=lau&response_type=code&redirect_uri=" + BaseURL + "/oauth2/callback")
         .headers(CommonHeader.case_headers_login)
 
         .formParam("username", "${email}")
@@ -64,21 +55,20 @@ object LAUCaseScenario {
         .formParam("save", "Sign in")
         .formParam("selfRegistrationEnabled", "false")
         .formParam("_csrf", "${csrfToken}")
-        .check(status is 200)
         .check(substring("User ID")))
 
   }
       .exitHereIfFailed
-    .pause(5)
+      .pause(Environment.thinkTime)
+  }
 
 
-  val LAUCaseSearch =
-
+  val LAUCaseSearch = {
     feed(CaseSearches)
-    .group("LAU Case Search") {
+    .group("LAU_040_Case_Search") {
 
       exec(http("LAU Case Search")
-       .post(baseurl + "/case-search")
+       .post(BaseURL + "/case-search")
        .headers(CommonHeader.case_headers_1)
        .header("ServiceAuthorization", "${s2sToken}")
        .formParam("userId", "")
@@ -88,45 +78,48 @@ object LAUCaseScenario {
        .formParam("caseJurisdictionId", "${caseJurisdictionId}")
        .formParam("endTimestamp", "${endTimestamp}")
        .formParam("page", "1")
-       .check(substring("Search")))
+       .check(substring("Case Activity Results")))
 
    }
-      .pause(2)
+      .exitHereIfFailed
+      .pause(Environment.thinkTime)
+  }
 
 
-       val LAUCaseNextPage =
+  val LAUCaseNextPage =
 
-         group("LAU Case Next Page") {
+         group("LAU_050_Case_Next") {
             exec(http("LAU Case Second Page Click")
-              .get(baseurl + "/case-activity/page/2")
-              .headers(CommonHeader.case_headers_2))
+              .get(BaseURL + "/case-activity/page/2")
+              .headers(CommonHeader.case_headers_2)
+              .check(substring("Page 2")))
            //need to check if the get is different for Idam
+
+           //add a check
 
 
     }
 
            .exitHereIfFailed
-           .pause(5)
+           .pause(Environment.thinkTime)
 
 
 
   val LAUcsvCaseActivityDownload =
-    group("LAU Case Activity CSV Download") {
+    group("LAU_060_Activity_Download") {
       exec(http("Case Activity CSV Download")
-        .get(baseurl + "/case-activity/csv")
+        .get(BaseURL + "/case-activity/csv")
         .headers(CommonHeader.case_headers_3))
     }
       .exitHereIfFailed
-      .pause(3)
+      .pause(Environment.thinkTime)
 
   val LAUcsvCaseSearchDownload =
-    group("LAU Case Search CSV Download") {
+    group("LAU_070_Search_Download") {
       exec(http("Case Search CSV Download")
-        .get(baseurl + "/case-searches/csv")
+        .get(BaseURL + "/case-searches/csv")
         .headers(CommonHeader.case_headers_3))
     }
       .exitHereIfFailed
-      .pause(3)
+      .pause(Environment.thinkTime)
 }
-
-
