@@ -42,8 +42,8 @@ class mainSimulation extends Simulation{
 
 
   setUp(
-    CompleteLogonSim.inject(rampUsers(1) during (5 minutes))
-      .protocols(httpProtocol)
+  CompleteCaseSim.inject(rampUsers(1) during (5 minutes))
+  .protocols(httpProtocol)
   )
 
 }

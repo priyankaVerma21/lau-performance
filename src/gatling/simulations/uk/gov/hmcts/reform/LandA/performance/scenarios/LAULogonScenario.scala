@@ -13,60 +13,55 @@ object LAULogonScenario {
 
 
   val S2SAuthToken =
-    group("LAU_010_Case_S2S") {
+      group("LAU_010_Case_S2S") {
       exec(http("S2S Authorisation for Logons Audit")
         .post(Environment.S2S_BASE_URI + "/lease")
         .header("Content-Type", "application/json")
         .body(StringBody(
-          """{
-       "microservice": "idam_frontend"
-        }"""
+            """{
+          "microservice": "idam_frontend"
+            }"""
         )).asJson
         .check(bodyString.saveAs("s2sToken"))
         .check(bodyString.saveAs("responseBody")))
 
-    }
-      .exitHereIfFailed
-      .pause(Environment.thinkTime)
+      }
+        .exitHereIfFailed
+        .pause(Environment.thinkTime)
 
   val LogonCsrfCheck =
 
-  group("LAU_020_Case_CSRF") {
+      group("LAU_020_Case_CSRF") {
+      exec(http("LAU Logons CSRF check")
+        .get(IdamURL + "?client_id=lau&response_type=code&redirect_uri=" + BaseURL + "/oauth2/callback")
+        .headers(CommonHeader.logons_header_csrf)
+        .check(css("input[name='_csrf']", "value").saveAs("csrfToken"))
+      )
+      }
+        .exitHereIfFailed
+        .pause(Environment.thinkTime)
 
-    exec(http("LAU Logons CSRF check")
-      .get(IdamURL + "?client_id=lau&response_type=code&redirect_uri=" + BaseURL + "/oauth2/callback")
-      .headers(CommonHeader.logons_header_csrf)
-      .check(css("input[name='_csrf']", "value").saveAs("csrfToken"))
-    )
-  }
-    .exitHereIfFailed
-    .pause(Environment.thinkTime)
-
-    val LogonLogin =
+  val LogonLogin =
       feed(LogonUsers)
-        .group("LAU_030_Logons_Login") {
-          exec(http("LAU Logons Audit login")
-
-            .post(IdamURL + "?client_id=lau&response_type=code&redirect_uri=" + BaseURL + "/oauth2/callback")
-            .headers(CommonHeader.logon_headers_login)
-
-            .formParam("username", "${email}")
-            .formParam("password", "${password}")
-            .formParam("save", "Sign in")
-            .formParam("selfRegistrationEnabled", "false")
-            .formParam("_csrf", "${csrfToken}")
-            .check(substring("User ID")))
-        }
-      .exitHereIfFailed
-
+      .group("LAU_030_Logons_Login") {
+        exec(http("LAU Logons Audit login")
+          .post(IdamURL + "?client_id=lau&response_type=code&redirect_uri=" + BaseURL + "/oauth2/callback")
+          .headers(CommonHeader.logon_headers_login)
+          .formParam("username", "${email}")
+          .formParam("password", "${password}")
+          .formParam("save", "Sign in")
+          .formParam("selfRegistrationEnabled", "false")
+          .formParam("_csrf", "${csrfToken}")
+          .check(substring("User ID")))
+      }
+        .exitHereIfFailed
         .pause(Environment.thinkTime)
 
 
   val logonsAuditSearch =
-    feed(LogonSearches)
-     .group("LAU_040_Logon_Search") {
-       exec(http("Logons Search")
-
+      feed(LogonSearches)
+      .group("LAU_040_Logon_Search") {
+        exec(http("Logons Search")
          .post(BaseURL + "/logon-search")
          .headers(CommonHeader.logons_headers_3)
          .header("ServiceAuthorization", "${s2sToken}")
@@ -76,11 +71,10 @@ object LAULogonScenario {
          .formParam("endTimestamp", "2022-01-25 12:00:00")
          .formParam("page", "1")
          .check(substring("Logons Audit Results"))
-
-       )
-     }
-      .exitHereIfFailed
-      .pause(Environment.thinkTime)
+      )
+      }
+        .exitHereIfFailed
+        .pause(Environment.thinkTime)
 
 
   /* val LogonNextPage =
@@ -97,7 +91,6 @@ object LAULogonScenario {
 */
 
   val LogonCsvDownload =
-
     group("LAU_060_Logons_Download") {
       exec(http("CSV Download")
         .get(BaseURL + "/logons/csv")
