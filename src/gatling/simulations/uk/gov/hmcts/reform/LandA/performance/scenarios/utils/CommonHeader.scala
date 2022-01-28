@@ -2,80 +2,33 @@ package uk.gov.hmcts.reform.LandA.performance.scenarios.utils
 
 object CommonHeader {
 
-
-  val case_headers_login = Map(
-    "origin" -> "https://idam-web-public.perftest.platform.hmcts.net",
-    "sec-ch-ua" -> """ Not;A Brand";v="99", "Google Chrome";v="97", "Chromium";v="97""",
-    "sec-ch-ua-mobile" -> "?0",
-    "sec-ch-ua-platform" -> "macOS",
-    "sec-fetch-dest" -> "document",
-    "sec-fetch-mode" -> "navigate",
-    "sec-fetch-site" -> "same-origin",
-    "sec-fetch-user" -> "?1",
-    "upgrade-insecure-requests" -> "1")
-
-  val case_headers_1 = Map(
-    "origin" -> "https://lau.perftest.platform.hmcts.net",
-    "sec-ch-ua" -> """ Not;A Brand";v="99", "Google Chrome";v="97", "Chromium";v="97""",
-    "sec-ch-ua-mobile" -> "?0",
-    "sec-ch-ua-platform" -> "macOS",
-    "sec-fetch-dest" -> "document",
-    "sec-fetch-mode" -> "navigate",
-    "sec-fetch-site" -> "same-origin",
-    "sec-fetch-user" -> "?1",
-    "upgrade-insecure-requests" -> "1")
-
-  val case_headers_2 = Map(
-    "sec-ch-ua" -> """ Not;A Brand";v="99", "Google Chrome";v="97", "Chromium";v="97""",
-    "sec-ch-ua-mobile" -> "?0",
-    "sec-ch-ua-platform" -> "macOS",
-    "sec-fetch-dest" -> "document",
-    "sec-fetch-mode" -> "navigate",
-    "sec-fetch-site" -> "same-origin",
-    "sec-fetch-user" -> "?1",
-    "upgrade-insecure-requests" -> "1")
-
-  val case_headers_3 = Map(
-    "accept" -> "*/*",
-    "sec-ch-ua" -> """ Not;A Brand";v="99", "Google Chrome";v="97", "Chromium";v="97""",
-    "sec-ch-ua-mobile" -> "?0",
-    "sec-ch-ua-platform" -> "macOS",
-    "sec-fetch-dest" -> "empty",
-    "sec-fetch-mode" -> "cors",
-    "sec-fetch-site" -> "same-origin")
-
-  val logon_headers_login = Map(
-    "origin" -> "https://idam-web-public.perftest.platform.hmcts.net",
-    "sec-ch-ua" -> """ Not;A Brand";v="99", "Google Chrome";v="97", "Chromium";v="97""",
-    "sec-ch-ua-mobile" -> "?0",
-    "sec-ch-ua-platform" -> "macOS",
-    "sec-fetch-dest" -> "document",
-    "sec-fetch-mode" -> "navigate",
-    "sec-fetch-site" -> "same-origin",
-    "sec-fetch-user" -> "?1",
-    "upgrade-insecure-requests" -> "1")
-
-  val logons_header_csrf = Map(
-    "sec-ch-ua" -> """ Not;A Brand";v="99", "Google Chrome";v="97", "Chromium";v="97""",
-    "sec-ch-ua-mobile" -> "?0",
-    "sec-ch-ua-platform" -> "macOS",
+  val homepage_header = Map(
+    "accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "accept-encoding" -> "gzip, deflate, br",
+    "accept-language" -> "en-GB,en;q=0.9",
     "sec-fetch-dest" -> "document",
     "sec-fetch-mode" -> "navigate",
     "sec-fetch-site" -> "none",
     "sec-fetch-user" -> "?1",
     "upgrade-insecure-requests" -> "1")
 
-  val logons_headers_3 = Map(
-    "origin" -> "https://lau.perftest.platform.hmcts.net",
-    "sec-ch-ua" -> """ Not;A Brand";v="99", "Google Chrome";v="97", "Chromium";v="97""",
-    "sec-ch-ua-mobile" -> "?0",
-    "sec-ch-ua-platform" -> "macOS",
+  val navigation_headers = Map(
+    "accept" -> "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+    "accept-encoding" -> "gzip, deflate, br",
+    "accept-language" -> "en-GB,en;q=0.9",
+    "content-type" -> "application/x-www-form-urlencoded",
     "sec-fetch-dest" -> "document",
     "sec-fetch-mode" -> "navigate",
     "sec-fetch-site" -> "same-origin",
     "sec-fetch-user" -> "?1",
     "upgrade-insecure-requests" -> "1")
 
-  val thinkTime = 10
+  val download_headers = Map(
+    "accept" -> "*/*",
+    "accept-encoding" -> "gzip, deflate, br",
+    "accept-language" -> "en-GB,en;q=0.9",
+    "sec-fetch-dest" -> "empty",
+    "sec-fetch-mode" -> "cors",
+    "sec-fetch-site" -> "same-origin")
 
 }

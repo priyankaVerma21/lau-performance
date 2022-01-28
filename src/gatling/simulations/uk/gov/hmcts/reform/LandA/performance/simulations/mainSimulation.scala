@@ -11,8 +11,8 @@ import scala.concurrent.duration._
 class mainSimulation extends Simulation{
 
   val BaseURL = Environment.baseUrl
-  val CaseUsers = csv("CaseUsers.csv").circular
-  val CaseSearches = csv("CaseSearchInfo.csv").circular
+  val CaseUsers = csv("Users.csv").circular
+  val CaseSearches = csv("CaseAuditSearch.csv").circular
 
   val httpProtocol = http
     .baseUrl(BaseURL)
@@ -20,30 +20,18 @@ class mainSimulation extends Simulation{
     .inferHtmlResources()
     .silentResources
 
-
-  val CompleteCaseSim = scenario("Case Complete")
-
-        .exec(LAUCaseScenario.S2SAuthToken)
-        .exec(LAUCaseScenario.LAUcsrfCheck)
-        .exec(LAUCaseScenario.LAUCaselogin)
-        .exec(LAUCaseScenario.LAUCaseSearch)
-        .exec(LAUCaseScenario.LAUCaseNextPage)
-        .exec(LAUCaseScenario.LAUcsvCaseActivityDownload)
-        //.exec(LAUCaseScenario.LAUcsvCaseSearchDownload)
-
-
-  val CompleteLogonSim = scenario("Logon Complete")
-        .exec(LAULogonScenario.S2SAuthToken)
-        .exec(LAULogonScenario.LogonCsrfCheck)
-        .exec(LAULogonScenario.LogonLogin)
-        .exec(LAULogonScenario.logonsAuditSearch)
-        // .exec(LandAIdamscenario.nextPage)
-        .exec(LAULogonScenario.LogonCsvDownload)
-
+  val LAUSimulation = scenario("LAU Simulation")
+    .exitBlockOnFail {
+      exec(LAUScenario.S2SAuthTokens)
+      .exec(LAUScenario.LAUHomepage)
+      .exec(LAUScenario.LAULogin)
+    }
+    .exec(LAUScenario.LAUCaseAuditSearch)
+    .exec(LAUScenario.LogonsAuditSearch)
 
   setUp(
-  CompleteCaseSim.inject(rampUsers(1) during (5 minutes))
-  .protocols(httpProtocol)
+    LAUSimulation.inject(rampUsers(1) during (5 minutes))
+    .protocols(httpProtocol)
   )
 
 }

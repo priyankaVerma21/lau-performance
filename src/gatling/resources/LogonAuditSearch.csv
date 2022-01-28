@@ -1,2 +1,2 @@
-emailAddress,startTimestamp,endTimestamp
+logonEmailAddress,logonStartTimestamp,logonEndTimestamp
 mark.jones@gmail.com,2020-09-01 12:00:00,2022-01-25 12:00:00
