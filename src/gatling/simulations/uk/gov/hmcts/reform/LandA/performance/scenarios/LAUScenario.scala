@@ -80,12 +80,12 @@ object LAUScenario {
           .formParam("endTimestamp", "${caseEndTimestamp}")
           .formParam("page", "1")
           .check(substring("Case Activity Results"))
-          .check(regex("""<span class="govuk-body-s">&emsp;Page 1 / ([0-9]+)&emsp;</span>(?s).*?<a id="case-activity-next-btn"""").saveAs("numberOfPages")))
+          .check(substring("case-activity-next-btn").optional.saveAs("moreCasePages")))
       }
       .pause(ThinkTime)
 
-    //only load the second page if the number of total pages is greater than 1
-    .doIf(session => session("numberOfPages").as[Int] > 1) {
+    //only load the second page if there are more pages available
+    .doIf("${moreCasePages.exists()}") {
 
       group("LAU_050_CaseAuditPage2") {
         exec(http("LAU Case Audit Page 2")
@@ -101,6 +101,7 @@ object LAUScenario {
       exec(http("Case Activity CSV Download")
         .get(BaseURL + "/case-activity/csv")
         .headers(CommonHeader.download_headers)
+        .check(substring("Case Jurisdiction Id"))
         .check(substring("filename")))
     }
     .pause(ThinkTime)
@@ -109,6 +110,7 @@ object LAUScenario {
       exec(http("Case Search CSV Download")
         .get(BaseURL + "/case-searches/csv")
         .headers(CommonHeader.download_headers)
+        .check(substring("Case Refs"))
         .check(substring("filename")))
     }
     .pause(ThinkTime)
@@ -127,27 +129,23 @@ object LAUScenario {
           .formParam("startTimestamp", "${logonStartTimestamp}")
           .formParam("endTimestamp", "${logonEndTimestamp}")
           .formParam("page", "1")
-          .check(substring("Logons Audit Results")))
-          //.check(regex("""<span class="govuk-body-s">&emsp;Page 1 / ([0-9]+)&emsp;</span>""").saveAs("numberOfPages")))
+          .check(substring("Logons Audit Results"))
+          .check(substring("logons-next-btn").optional.saveAs("moreLogonPages")))
       }
       .pause(Environment.thinkTime)
 
-    //TODO: Put this code back in once we have some data that generates more than 1 page of results, so we know what code to use
-      /*
-    //only load the second page if the number of total pages is greater than 1
-    .doIf(session => session("numberOfPages").as[Int] > 1) {
+      //only load the second page if there are more pages available
+      .doIf("${logons-next-btn.exists()}") {
 
       group("LAU_090_LogonAuditPage2") {
         exec(http("LAU Logon Audit Page 2")
-          .get(BaseURL + "/logon-search/page/2")
+          .get(BaseURL + "/logons/page/2")
           .headers(CommonHeader.navigation_headers)
           .check(substring("Page 2")))
       }
       .pause(ThinkTime)
 
     }
-
-       */
 
     .group("LAU_100_LogonActivityDownload") {
       exec(http("Logon Activity CSV Download")
