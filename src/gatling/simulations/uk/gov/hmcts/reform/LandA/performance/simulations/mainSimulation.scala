@@ -11,8 +11,6 @@ import scala.concurrent.duration._
 class mainSimulation extends Simulation{
 
   val BaseURL = Environment.baseUrl
-  val CaseUsers = csv("Users.csv").circular
-  val CaseSearches = csv("CaseAuditSearch.csv").circular
 
   val httpProtocol = http
     .baseUrl(BaseURL)
@@ -22,8 +20,7 @@ class mainSimulation extends Simulation{
 
   val LAUSimulation = scenario("LAU Simulation")
     .exitBlockOnFail {
-      exec(LAUScenario.S2SAuthTokens)
-      .exec(LAUScenario.LAUHomepage)
+      exec(LAUScenario.LAUHomepage)
       .exec(LAUScenario.LAULogin)
     }
     .exec(LAUScenario.LAUCaseAuditSearch)

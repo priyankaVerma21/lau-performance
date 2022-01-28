@@ -16,25 +16,6 @@ object LAUScenario {
   val LogonAuditSearches = csv("LogonAuditSearch.csv").circular
 
 
-  //Get S2S tokens for authorisation in subsequent LAU calls
-  val S2SAuthTokens =
-
-    exec(http("LAU_010_LAUServiceToken")
-      .post(Environment.S2S_BASE_URI + "/lease")
-      .header("Content-Type", "application/json")
-      .body(StringBody("""{"microservice": "lau_frontend"}""")).asJson
-      .check(bodyString.saveAs("s2sTokenLAU")))
-
-    .pause(ThinkTime)
-
-    .exec(http("LAU_015_IDAMServiceToken")
-      .post(Environment.S2S_BASE_URI + "/lease")
-      .header("Content-Type", "application/json")
-      .body(StringBody("""{"microservice": "idam_frontend"}""")).asJson
-      .check(bodyString.saveAs("s2sTokenIDAM")))
-
-    .pause(ThinkTime)
-
   val LAUHomepage =
 
     group("LAU_020_Homepage") {
@@ -42,8 +23,7 @@ object LAUScenario {
         .get(BaseURL)
         .headers(CommonHeader.homepage_header)
         .check(substring("Sign in"))
-        .check(css("input[name='_csrf']", "value").saveAs("csrfToken"))
-      )
+        .check(css("input[name='_csrf']", "value").saveAs("csrfToken")))
     }
     .pause(ThinkTime)
 
@@ -71,7 +51,6 @@ object LAUScenario {
         exec(http("LAU Case Audit Search")
           .post(BaseURL + "/case-search")
           .headers(CommonHeader.navigation_headers)
-          .header("ServiceAuthorization", "${s2sTokenLAU}")
           .formParam("userId", "")
           .formParam("caseRef", "")
           .formParam("startTimestamp", "${caseStartTimestamp}")
@@ -129,7 +108,6 @@ object LAUScenario {
         exec(http("LAU Logon Audit Search")
           .post(BaseURL + "/logon-search")
           .headers(CommonHeader.navigation_headers)
-          .header("ServiceAuthorization", "${s2sTokenIDAM}")
           .formParam("userId", "")
           .formParam("emailAddress", "${logonEmailAddress}")
           .formParam("startTimestamp", "${logonStartTimestamp}")
