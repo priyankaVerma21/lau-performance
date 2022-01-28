@@ -27,7 +27,7 @@ object LAUScenario {
 
     .pause(ThinkTime)
 
-    .exec(http("LAU_050_IDAMServiceToken")
+    .exec(http("LAU_015_IDAMServiceToken")
       .post(Environment.S2S_BASE_URI + "/lease")
       .header("Content-Type", "application/json")
       .body(StringBody("""{"microservice": "idam_frontend"}""")).asJson
@@ -80,40 +80,46 @@ object LAUScenario {
           .formParam("endTimestamp", "${caseEndTimestamp}")
           .formParam("page", "1")
           .check(substring("Case Activity Results"))
+          .check(regex("""Case Activity Results</h2>(?s)\s*?<p class="govuk-body">No results found""").optional.saveAs("noCaseResults"))
           .check(substring("case-activity-next-btn").optional.saveAs("moreCasePages")))
       }
       .pause(ThinkTime)
 
-    //only load the second page if there are more pages available
-    .doIf("${moreCasePages.exists()}") {
+    //only continue if results were found ('No results found' wasn't found on the results page)
+    .doIf("${noCaseResults.isUndefined()}") {
 
-      group("LAU_050_CaseAuditPage2") {
-        exec(http("LAU Case Audit Page 2")
-          .get(BaseURL + "/case-activity/page/2")
-          .headers(CommonHeader.navigation_headers)
-          .check(substring("Page 2")))
+      //only load the second page if there are more pages available
+      doIf("${moreCasePages.exists()}") {
+
+        group("LAU_050_CaseAuditPage2") {
+          exec(http("LAU Case Audit Page 2")
+            .get(BaseURL + "/case-activity/page/2")
+            .headers(CommonHeader.navigation_headers)
+            .check(substring("Page 2")))
+        }
+        .pause(ThinkTime)
+
+      }
+
+      .group("LAU_060_CaseActivityDownload") {
+        exec(http("Case Activity CSV Download")
+          .get(BaseURL + "/case-activity/csv")
+          .headers(CommonHeader.download_headers)
+          .check(substring("Case Jurisdiction Id"))
+          .check(substring("filename")))
+      }
+      .pause(ThinkTime)
+
+      .group("LAU_070_CaseSearchDownload") {
+        exec(http("Case Search CSV Download")
+          .get(BaseURL + "/case-searches/csv")
+          .headers(CommonHeader.download_headers)
+          .check(substring("Case Refs"))
+          .check(substring("filename")))
       }
       .pause(ThinkTime)
 
     }
-
-    .group("LAU_060_CaseActivityDownload") {
-      exec(http("Case Activity CSV Download")
-        .get(BaseURL + "/case-activity/csv")
-        .headers(CommonHeader.download_headers)
-        .check(substring("Case Jurisdiction Id"))
-        .check(substring("filename")))
-    }
-    .pause(ThinkTime)
-
-    .group("LAU_070_CaseSearchDownload") {
-      exec(http("Case Search CSV Download")
-        .get(BaseURL + "/case-searches/csv")
-        .headers(CommonHeader.download_headers)
-        .check(substring("Case Refs"))
-        .check(substring("filename")))
-    }
-    .pause(ThinkTime)
 
   //Perform a logon audit search and download the CSV file
   val LogonsAuditSearch =
@@ -129,33 +135,39 @@ object LAUScenario {
           .formParam("startTimestamp", "${logonStartTimestamp}")
           .formParam("endTimestamp", "${logonEndTimestamp}")
           .formParam("page", "1")
-          .check(substring("Logons Audit Results"))
+          .check(regex("Logons Audit Results|System Logon Results"))
+          .check(regex("""System Logon Results</h2>(?s)\s*?<p class="govuk-body">No results found""").optional.saveAs("noLogonResults"))
           .check(substring("logons-next-btn").optional.saveAs("moreLogonPages")))
       }
       .pause(Environment.thinkTime)
 
+    //only continue if results were found ('No results found' wasn't found on the results page)
+    .doIf("${noLogonResults.isUndefined()}") {
+
       //only load the second page if there are more pages available
-      .doIf("${logons-next-btn.exists()}") {
+      doIf("${moreLogonPages.exists()}") {
 
-      group("LAU_090_LogonAuditPage2") {
-        exec(http("LAU Logon Audit Page 2")
-          .get(BaseURL + "/logons/page/2")
-          .headers(CommonHeader.navigation_headers)
-          .check(substring("Page 2")))
+        group("LAU_090_LogonAuditPage2") {
+          exec(http("LAU Logon Audit Page 2")
+            .get(BaseURL + "/logons/page/2")
+            .headers(CommonHeader.navigation_headers)
+            .check(substring("Page 2")))
+        }
+        .pause(ThinkTime)
+
       }
-      .pause(ThinkTime)
+
+      .group("LAU_100_LogonActivityDownload") {
+        exec(http("Logon Activity CSV Download")
+          .get(BaseURL + "/logons/csv")
+          .headers(CommonHeader.download_headers)
+          .check(substring("Ip Address"))
+          .check(substring("filename")))
+
+      }
+      .pause(Environment.thinkTime)
 
     }
-
-    .group("LAU_100_LogonActivityDownload") {
-      exec(http("Logon Activity CSV Download")
-        .get(BaseURL + "/logons/csv")
-        .headers(CommonHeader.download_headers)
-        .check(substring("Ip Address"))
-        .check(substring("filename")))
-
-    }
-    .pause(Environment.thinkTime)
 
 }
 
