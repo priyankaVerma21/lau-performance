@@ -6,9 +6,11 @@ plugins {
     id 'groovy'
     id 'com.gradle.plugin-publish' version '0.9.8'
     id 'maven-publish'
+    id 'application'
 }
 //apply plugin: 'java'
 apply plugin: 'scala'
+apply plugin: 'application'
 group 'uk.gov.hmcts.reform'
 version = '1.0'
 sourceCompatibility = "11"
