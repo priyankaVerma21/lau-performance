@@ -5,6 +5,6 @@ object Environment {
   val baseUrl = "https://lau.perftest.platform.hmcts.net"
   val idamUrl = "https://idam-web-public.perftest.platform.hmcts.net"
 
-  val thinkTime = 2
+  val thinkTime = 5
 
 }

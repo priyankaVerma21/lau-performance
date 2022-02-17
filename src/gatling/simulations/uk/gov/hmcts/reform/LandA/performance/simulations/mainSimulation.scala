@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.LandA.performance.simulations
 
-import io.gatling.core.scenario.Simulation
-import uk.gov.hmcts.reform.LandA.performance.scenarios._
 import io.gatling.core.Predef._
 import io.gatling.http.Predef._
-import utils.Environment
+import io.gatling.core.scenario.Simulation
+import uk.gov.hmcts.reform.LandA.performance.scenarios.utils.Environment
+import uk.gov.hmcts.reform.LandA.performance.scenarios._
 
 import scala.concurrent.duration._
 
@@ -28,7 +28,7 @@ class mainSimulation extends Simulation{
         .exec(LAUScenario.LogonsAuditSearch)
     }
   setUp(
-    LAUSimulation.inject(rampUsers(3) during (5 minutes))
+    LAUSimulation.inject(rampUsers(3) during (50 minutes))
     .protocols(httpProtocol)
   )
 
