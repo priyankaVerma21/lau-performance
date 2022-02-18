@@ -51,7 +51,7 @@ object LAUScenario {
         exec(http("LAU Case Audit Search")
           .post(BaseURL + "/case-search")
           .headers(CommonHeader.navigation_headers)
-          .formParam("userId", "")
+          .formParam("userId", "${userID}")
           .formParam("caseRef", "")
           .formParam("startTimestamp", "${caseStartTimestamp}")
           .formParam("caseTypeId", "")
@@ -93,7 +93,7 @@ object LAUScenario {
         exec(http("Case Search CSV Download")
           .get(BaseURL + "/case-searches/csv")
           .headers(CommonHeader.download_headers)
-          .check(substring("Case Refs"))
+          .check(substring("Case Ref"))
           .check(substring("filename")))
       }
       .pause(ThinkTime)
