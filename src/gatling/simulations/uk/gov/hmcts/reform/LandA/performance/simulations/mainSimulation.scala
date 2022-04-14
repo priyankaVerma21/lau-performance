@@ -28,7 +28,7 @@ class mainSimulation extends Simulation{
         .exec(LAUScenario.LogonsAuditSearch)
     }
   setUp(
-    LAUSimulation.inject(rampUsers(3) during (50 minutes))
+    LAUSimulation.inject(rampUsers(3) during (60 minutes))
     .protocols(httpProtocol)
   )
 
