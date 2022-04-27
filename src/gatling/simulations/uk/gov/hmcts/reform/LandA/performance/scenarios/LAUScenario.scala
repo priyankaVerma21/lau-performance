@@ -14,6 +14,9 @@ object LAUScenario {
   val Users = csv("Users.csv").circular
   val CaseAuditSearches = csv("CaseAuditSearch.csv").circular
   val LogonAuditSearches = csv("LogonAuditSearch.csv").circular
+  val UsersAat = csv("UsersAat.csv").circular
+  val CaseAuditSearchesAat = csv("CaseAuditSearchAat.csv").circular
+  val LogonAuditSearchesAat = csv("LogonAuditSearchAat.csv").circular
 
 
   val LAUHomepage =
@@ -29,7 +32,10 @@ object LAUScenario {
 
   val LAULogin =
 
-    feed(Users)
+    doSwitch("${env}") (
+      "perftest" -> feed(Users),
+      "aat" -> feed(UsersAat)
+    )
       .group("LAU_030_Login") {
         exec(http("LAU Login")
           .post(IdamURL + "/login?client_id=lau&response_type=code&redirect_uri=" + BaseURL + "/oauth2/callback")
@@ -46,7 +52,10 @@ object LAUScenario {
   //Perform a case audit search and download the CSV file
   val LAUCaseAuditSearch =
 
-    feed(CaseAuditSearches)
+    doSwitch("${env}") (
+      "perftest" -> feed(CaseAuditSearches),
+      "aat" -> feed(CaseAuditSearchesAat)
+    )
       .group("LAU_040_CaseAuditSearch") {
         exec(http("LAU Case Audit Search")
           .post(BaseURL + "/case-search")
@@ -59,7 +68,7 @@ object LAUScenario {
           .formParam("endTimestamp", "${caseEndTimestamp}")
           .formParam("page", "1")
           .check(substring("Case Activity Results"))
-          .check(regex("""Case Activity Results</h2>(?s)\s*?<p class="govuk-body">No results found""").optional.saveAs("noCaseResults"))
+          .check(regex("""Case Activity Results</li>(?s)\s*?<p class="govuk-body">No results found""").optional.saveAs("noCaseResults"))
           .check(substring("case-activity-next-btn").optional.saveAs("moreCasePages")))
       }
       .pause(ThinkTime)
@@ -103,7 +112,10 @@ object LAUScenario {
   //Perform a logon audit search and download the CSV file
   val LogonsAuditSearch =
 
-    feed(LogonAuditSearches)
+    doSwitch("${env}") (
+      "perftest" -> feed(LogonAuditSearches),
+      "aat" -> feed(LogonAuditSearchesAat)
+    )
       .group("LAU_080_LogonAuditSearch") {
         exec(http("LAU Logon Audit Search")
           .post(BaseURL + "/logon-search")
