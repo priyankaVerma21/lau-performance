@@ -73,6 +73,22 @@ class mainSimulation extends Simulation{
         session
     }
 
+  val LAUDeleteSimulation = scenario("LAU Simulation")
+    .exitBlockOnFail {
+      exec(_.set("env", s"${env}"))
+        .exec(LAUScenarioDeletion.LAUHomepage)
+        .exec(LAUScenarioDeletion.LAULoginDeletion)
+    }
+    .repeat(1) {
+      exec(LAUScenarioDeletion.LAUCaseDeletionSearch)
+    }
+
+    .exec {
+      session =>
+        println(session)
+        session
+    }
+
   //defines the Gatling simulation model, based on the inputs
   def simulationProfile(simulationType: String, numberOfPerformanceTestUsers: Double, numberOfPipelineUsers: Double): Seq[OpenInjectionStep] = {
     simulationType match {
@@ -109,7 +125,7 @@ class mainSimulation extends Simulation{
   }
 
   setUp(
-    LAUSimulation.inject(simulationProfile(testType, numberOfPerformanceTestUsers, numberOfPipelineUsers)).pauses(pauseOption)
+    LAUDeleteSimulation.inject(simulationProfile(testType, numberOfPerformanceTestUsers, numberOfPipelineUsers)).pauses(pauseOption)
   ).protocols(httpProtocol)
     .assertions(assertions(testType))
 
