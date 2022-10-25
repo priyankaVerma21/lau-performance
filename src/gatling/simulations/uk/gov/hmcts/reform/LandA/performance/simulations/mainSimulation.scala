@@ -57,7 +57,8 @@ class mainSimulation extends Simulation {
   }
 
   val LAUSimulation = scenario("LAU Simulation")
-    .exitBlockOnFail {
+   // .exitBlockOnFail {
+    .repeat(1) {
       exec(_.set("env", s"${env}"))
         .exec(LAUScenario.LAUHomepage)
         .exec(LAUScenario.LAULogin)
