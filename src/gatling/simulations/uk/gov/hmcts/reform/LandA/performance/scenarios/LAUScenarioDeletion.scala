@@ -57,8 +57,8 @@ object LAUScenarioDeletion {
       "perftest" -> feed(CaseDeleteSearches),
       "aat" -> feed(CaseAuditSearchesAat)
     )
-      .group("LAU_130_CaseAuditSearch") {
-        exec(http("LAU Case Audit Search")
+      .group("LAU_130_CaseDeletionSearch") {
+        exec(http("LAU Case Deletion Search")
           .post(BaseURL + "/case-deletions-search")
           .headers(CommonHeader.navigation_headers)
           .header("accept-language", "en-GB,en-US;q=0.9,en;q=0.8")
@@ -83,8 +83,8 @@ object LAUScenarioDeletion {
       //only load the second page if there are more pages available
       doIf("${moreCasePages.exists()}") {
 
-        group("LAU_140_CaseAuditPage2") {
-          exec(http("LAU Case Audit Page 2")
+        group("LAU_140_CaseDeletionPage2") {
+          exec(http("LAU Case Deletion Page 2")
             .get(BaseURL + "/case-deletions/page/2")
             .headers(CommonHeader.navigation_headers)
             .check(substring("Page 2")))
@@ -94,8 +94,8 @@ object LAUScenarioDeletion {
     }
 
 
-      .group("LAU_150_CaseActivityDownload") {
-        exec(http("Case Activity CSV Download")
+      .group("LAU_150_CaseDeletionDownload") {
+        exec(http("Case Deletion CSV Download")
           .get(BaseURL + "/case-deletions/csv")
           .headers(CommonHeader.download_headers)
           .check(substring("Case Jurisdiction Id"))
@@ -103,6 +103,16 @@ object LAUScenarioDeletion {
       }
       .pause(ThinkTime)
 
+
+  val LAUSignOut =
+
+  group("LAU_160_SignOut") {
+    exec(http("User Sign Out")
+      .get(BaseURL + "/logout")
+      .headers(CommonHeader.navigation_headers)
+      .check(substring("Sign in")))
+  }
+    .pause(ThinkTime)
 
 
 }

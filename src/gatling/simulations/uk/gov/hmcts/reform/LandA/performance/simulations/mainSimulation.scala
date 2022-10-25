@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.LandA.performance.scenarios._
 
 import scala.concurrent.duration._
 
-class mainSimulation extends Simulation{
+class mainSimulation extends Simulation {
 
   val BaseURL = Environment.baseUrl
 
@@ -21,7 +21,7 @@ class mainSimulation extends Simulation{
   val testType = scala.util.Properties.envOrElse("TEST_TYPE", "perftest")
 
   //set the environment based on the test type
-  val environment = testType match{
+  val environment = testType match {
     case "perftest" => "perftest"
     case "pipeline" => "aat"
     case _ => "**INVALID**"
@@ -35,11 +35,11 @@ class mainSimulation extends Simulation{
 
   /* PERFORMANCE TEST CONFIGURATION */
   val testDurationMins = 60
-  val numberOfPerformanceTestUsers:Double = 3
-  val numberOfPipelineUsers:Double = 3
+  val numberOfPerformanceTestUsers: Double = 3
+  val numberOfPipelineUsers: Double = 3
 
   //If running in debug mode, disable pauses between steps
-  val pauseOption:PauseType = debugMode match{
+  val pauseOption: PauseType = debugMode match {
     case "off" => constantPauses
     case _ => disabledPauses
   }
@@ -50,7 +50,7 @@ class mainSimulation extends Simulation{
     .inferHtmlResources()
     .silentResources
 
-  before{
+  before {
     println(s"Test Type: ${testType}")
     println(s"Test Environment: ${env}")
     println(s"Debug Mode: ${debugMode}")
@@ -59,12 +59,19 @@ class mainSimulation extends Simulation{
   val LAUSimulation = scenario("LAU Simulation")
     .exitBlockOnFail {
       exec(_.set("env", s"${env}"))
-      .exec(LAUScenario.LAUHomepage)
+        .exec(LAUScenario.LAUHomepage)
         .exec(LAUScenario.LAULogin)
-    }
-    .repeat(5) {
-      exec(LAUScenario.LAUCaseAuditSearch)
-        .exec(LAUScenario.LogonsAuditSearch)
+        .repeat(5) {
+          exec(LAUScenario.LAUCaseAuditSearch)
+            .exec(LAUScenario.LogonsAuditSearch)
+        }
+        .exec(LAUScenarioDeletion.LAUSignOut)
+        .exec(LAUScenarioDeletion.LAUHomepage)
+        .exec(LAUScenarioDeletion.LAULoginDeletion)
+        .repeat(5) {
+          exec(LAUScenarioDeletion.LAUCaseDeletionSearch)
+        }
+        .exec(LAUScenarioDeletion.LAUSignOut)
     }
 
     .exec {
@@ -125,7 +132,7 @@ class mainSimulation extends Simulation{
   }
 
   setUp(
-    LAUDeleteSimulation.inject(simulationProfile(testType, numberOfPerformanceTestUsers, numberOfPipelineUsers)).pauses(pauseOption)
+    LAUSimulation.inject(simulationProfile(testType, numberOfPerformanceTestUsers, numberOfPipelineUsers)).pauses(pauseOption)
   ).protocols(httpProtocol)
     .assertions(assertions(testType))
 
